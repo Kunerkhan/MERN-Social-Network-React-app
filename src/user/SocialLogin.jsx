@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import GoogleLogin from "react-google-login";
 import { useNavigate } from "react-router-dom";
-import { gapi } from "gapi-script";
 
 import { useAuth } from "../shared/hooks/auth/use-auth";
 
@@ -39,23 +38,6 @@ export const SocialLogin = () => {
             navigate("/");
         }
     }, [state.redirectToReferrer, navigate]);
-
-    // useEffect(() => {
-    //     // function start() {
-    //     //   gapi.client.init({
-    //     //     clientId: process.env.REACT_PUBLIC_GOOGLE_CLIENT_ID,
-    //     //     scope: 'email',
-    //     //   });
-    //     // }
-
-    //     window.gapi.client.init({
-    //         clientId: process.env.REACT_PUBLIC_GOOGLE_CLIENT_ID,
-    //         scope: 'email',
-    //         plugin_name: 'PLUGIN'
-    //     })
-    
-    //     // gapi.load('client:auth2', start);
-    //   }, []);
 
     return(
         <div className="container">
