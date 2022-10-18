@@ -15,6 +15,7 @@ import { PostDetails } from "./post/Details";
 import { EditPost } from "./post/EditPost";
 import { ForgotPassword } from "./user/ForgotPassword";
 import { ResetPassword } from "./user/ResetPassword";
+import { Admin } from "./admin/Admin";
 
 export const MainRouter = () => (
     <div>
@@ -22,6 +23,7 @@ export const MainRouter = () => (
 
         <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route
                 path="/reset-password/:resetPasswordToken"

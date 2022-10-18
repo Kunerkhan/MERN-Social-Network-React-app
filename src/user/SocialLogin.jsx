@@ -11,13 +11,9 @@ export const SocialLogin = () => {
     });
     const { socialLogin, handleAuthenticate } = useAuth();
     const responseGoogle = response => {
-        console.log(response);
-        const { googleId, name, email, imageUrl } = response.profileObj;
+        const tokenId = response.tokenId;
         const user = {
-            password: googleId,
-            name: name,
-            email: email,
-            imageUrl: imageUrl
+            tokenId: tokenId
         };
 
         socialLogin(user).then(data => {

@@ -24,23 +24,23 @@ export const EditProfile = () => {
     const { isAuthenticated } = useAuth();
     const token = useMemo(() => isAuthenticated().token, [isAuthenticated]);
 
-    const init = useCallback(() => 
+    const init = useCallback(() =>
         getUser(userId, token)
             .then(data => {
-                if(data.error) {
+                if (data.error) {
                     setState({ redirectToProfile: false });
                 } else {
-                    setState({ 
+                    setState({
                         ...state,
                         id: data._id,
                         name: data.name,
                         email: data.email,
                         about: data.about,
                         error: "",
-                     });
+                    });
                 }
-            }), 
-    [userId, state, token, setState]);
+            }),
+        [userId, state, token, setState]);
 
     const handleChange = useCallback((e) => {
         const value = e.target.name === "photo" ? e.target.files[0] : e.target.value;
@@ -56,43 +56,39 @@ export const EditProfile = () => {
     const isValid = useCallback(() => {
         const { name, email, password, fileSize } = state;
 
-        if(fileSize > 1000000)
-        {
-            setState({ 
-                ...state, 
+        if (fileSize > 1000000) {
+            setState({
+                ...state,
                 error: "File size should be less than 1 Mb",
                 loading: false,
             });
             return false;
         }
 
-        if(name.length === 0)
-        {
-            setState({ 
-                ...state, 
+        if (name.length === 0) {
+            setState({
+                ...state,
                 error: "Name is required",
                 loading: false,
-             });
+            });
             return false;
         }
 
-        if(!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
-        {
-            setState({ 
-                ...state, 
+        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+            setState({
+                ...state,
                 error: "A vaild email is required",
                 loading: false,
-             });
+            });
             return false;
         }
 
 
-        if(password.length >= 0 && password.length <=5)
-        {
-            setState({ 
-                ...state, 
+        if (password.length >= 0 && password.length <= 5) {
+            setState({
+                ...state,
                 error: "Password must be at least 6 characters long",
-                loading: false, 
+                loading: false,
             });
             return false;
         }
@@ -104,24 +100,30 @@ export const EditProfile = () => {
         e.preventDefault();
         setState({ ...state, loading: true })
 
-        if(isValid()) {
+        if (isValid()) {
             const { name, email, password, photo, about } = state;
             let formData = new FormData();
-            formData.append('photo', photo); 
+            formData.append('photo', photo);
             formData.append('name', name);
             formData.append('email', email);
-            formData.append('password', password); 
-            formData.append('about', about); 
-            
+            formData.append('password', password);
+            formData.append('about', about);
+
             updateUser(userId, formData, token)
                 .then(data => {
-                    if(data.error) setState({ error: data.error })
+                    if (data.error) setState({ error: data.error })
+                    else if (isAuthenticated().user.role === "admin") {
+                        setState({
+                            ...initialValues,
+                            redirectToProfile: true
+                        });
+                    }
                     else {
                         updateLocalStorage(data, () => {
-                            setState({ 
-                                ...initialValues, 
-                                redirectToProfile: true 
-                            })
+                            setState({
+                                ...initialValues,
+                                redirectToProfile: true
+                            });
                         });
                     }
                 });
@@ -130,92 +132,90 @@ export const EditProfile = () => {
     }, [userId, state, token, isValid]);
 
     const renderForm = useCallback((name, email, password, about) => (
-    <form>
-        <div className="form-group">
-            <label className="text-muted">
-                Profile photo
-            </label>
-            <input  
-                className="form-control" 
-                type="file"
-                name="photo"
-                accept="image/*"
-                onChange={handleChange}
-            />
-        </div>
-        <div className="form-group">
-            <label className="text-muted">
-                Name
-            </label>
-            <input  
-                className="form-control" 
-                type="text"
-                name="name"
-                value={name}
-                onChange={handleChange}
-            />
-        </div>
+        <form>
+            <div className="form-group">
+                <label className="text-muted">
+                    Profile photo
+                </label>
+                <input
+                    className="form-control"
+                    type="file"
+                    name="photo"
+                    accept="image/*"
+                    onChange={handleChange}
+                />
+            </div>
+            <div className="form-group">
+                <label className="text-muted">
+                    Name
+                </label>
+                <input
+                    className="form-control"
+                    type="text"
+                    name="name"
+                    value={name}
+                    onChange={handleChange}
+                />
+            </div>
 
-        <div className="form-group">
-            <label className="text-muted">
-                Email
-            </label>
-            <input 
-                className="form-control"
-                type="email" 
-                name="email"
-                value={email}
-                onChange={handleChange}
-            />
-        </div>
+            <div className="form-group">
+                <label className="text-muted">
+                    Email
+                </label>
+                <input
+                    className="form-control"
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={handleChange}
+                />
+            </div>
 
-        <div className="form-group">
-            <label className="text-muted">
-                About
-            </label>
-            <textarea  
-                className="form-control" 
-                type="text"
-                name="about"
-                value={about}
-                onChange={handleChange}
-            />
-        </div>
+            <div className="form-group">
+                <label className="text-muted">
+                    About
+                </label>
+                <textarea
+                    className="form-control"
+                    type="text"
+                    name="about"
+                    value={about}
+                    onChange={handleChange}
+                />
+            </div>
 
-        <div className="form-group">
-            <label className="text-muted">
-                Password
-            </label>
-            <input 
-                className="form-control"
-                type="password" 
-                name="password"
-                value={password}
-                onChange={handleChange}
-            />
-        </div>
+            <div className="form-group">
+                <label className="text-muted">
+                    Password
+                </label>
+                <input
+                    className="form-control"
+                    type="password"
+                    name="password"
+                    value={password}
+                    onChange={handleChange}
+                />
+            </div>
 
-        <button 
-            className="btn btn-raised btn-primary" 
-            type="submit"
-            onClick={handleSubmit}
-        >
-            Save
-        </button>
-    </form>
+            <button
+                className="btn btn-raised btn-primary"
+                type="submit"
+                onClick={handleSubmit}
+            >
+                Save
+            </button>
+        </form>
     ), [handleChange, handleSubmit]);
 
     useEffect(() => {
-        if(userId)
-        {
+        if (userId) {
             init();
         }
 
     }, [userId]);
 
     useEffect(() => {
-        if(state.redirectToProfile)
-        {
+        if (state.redirectToProfile) {
             navigate(`/user/${userId}`);
         }
     }, [state.redirectToProfile, userId, navigate]);
@@ -231,31 +231,34 @@ export const EditProfile = () => {
             </div>)
             }
 
-            { state.error && (
-                <div 
-                    className="alert alert-danger" 
+            {state.error && (
+                <div
+                    className="alert alert-danger"
                     style={{
                         display: state.error ? "" : "none"
                     }}
                 >
                     {state.error}
                 </div>
-            )}    
+            )}
 
             {
                 <img
-                    className="img-thumbnail" 
+                    className="img-thumbnail"
                     style={{
                         width: "auto",
                         height: "200px",
                     }}
-                    src={`${process.env.REACT_APP_API_URL}/post/photo/${userId}?${new Date().getTime()}`} 
+                    src={`${process.env.REACT_APP_API_URL}/post/photo/${userId}?${new Date().getTime()}`}
                     alt={state.name}
                     onError={i => i.target.src = DefaultProfile}
                 />
             }
 
-            {renderForm(state.name, state.email, state.password, state.about)}
+            {isAuthenticated().user.role === "admin" ||
+                (isAuthenticated().user._id === userId &&
+                    renderForm(state.name, state.email, state.password, state.about))
+            }
         </div>
     )
 };

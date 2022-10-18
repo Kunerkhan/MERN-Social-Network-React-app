@@ -11,6 +11,7 @@ const initialValues = {
     error: "",
     redirectToReferer: false,
     loading: false,
+    recaptcha: false,
 };
 
 export const SignIn = () => {
@@ -28,29 +29,65 @@ export const SignIn = () => {
         });
     }, [state, setState]);
 
+    const recaptchaHandler = e => {
+        setState({ ...state, error: "" });
+        let userDay = e.target.value.toLowerCase();
+        let dayCount;
+ 
+        if (userDay === "sunday") {
+            dayCount = 0;
+        } else if (userDay === "monday") {
+            dayCount = 1;
+        } else if (userDay === "tuesday") {
+            dayCount = 2;
+        } else if (userDay === "wednesday") {
+            dayCount = 3;
+        } else if (userDay === "thursday") {
+            dayCount = 4;
+        } else if (userDay === "friday") {
+            dayCount = 5;
+        } else if (userDay === "saturday") {
+            dayCount = 6;
+        }
+ 
+        if (dayCount === new Date().getDay()) {
+            setState({ ...state, recaptcha: true });
+            return true;
+        } else {
+            setState({
+                ...state,
+                recaptcha: false
+            });
+            return false;
+        }
+    };
+
     const handleSubmit = useCallback((e) => {
         e.preventDefault();
         setState({ ...state, loading: true });
         const { email, password, } = state;
 
-        handleSignIn({
-            email,
-            password,
-        })
-            .then(data => {
-                if (data.error) {
-                    setState({ error: data.error, loading: false });
-                }
-                else {
-                    handleAuthenticate(data, () => setState({
-                        redirectToReferer: true,
-                    }))
-                }
-            });
+        if(state.recaptcha)
+        {
+            handleSignIn({
+                email,
+                password,
+            })
+                .then(data => {
+                    if (data.error) {
+                        setState({ error: data.error, loading: false });
+                    }
+                    else {
+                        handleAuthenticate(data, () => setState({
+                            redirectToReferer: true,
+                        }))
+                    }
+                });
+        }
 
     }, [state, handleSignIn, handleAuthenticate, setState]);
 
-    const renderForm = useCallback((email, password) => (
+    const renderForm = useCallback((email, password, recaptcha) => (
         <form>
             <div className="form-group">
                 <label className="text-muted">
@@ -79,9 +116,22 @@ export const SignIn = () => {
                 />
             </div>
 
+            <div className="form-group">
+                <label className="text-muted">
+                    {recaptcha ? "Thanks. You got it!" : "What day is today?"}
+                </label>
+            
+                <input
+                    onChange={recaptchaHandler}
+                    type="text"
+                    className="form-control"
+                />
+            </div>
+
             <button
                 className="btn btn-raised btn-primary"
                 type="submit"
+                disabled={!recaptcha}
                 onClick={handleSubmit}
             >
                 Submit
@@ -116,7 +166,7 @@ export const SignIn = () => {
             </div>)
             }
 
-            {renderForm(state.email, state.password)}
+            {renderForm(state.email, state.password, state.recaptcha)}
 
             <p>
                 <Link to="/forgot-password" className="text-danger">

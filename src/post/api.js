@@ -1,5 +1,5 @@
-export const getPosts = () =>
-    fetch(`${process.env.REACT_APP_API_URL}/posts/`, {
+export const getPosts = (page) =>
+    fetch(`${process.env.REACT_APP_API_URL}/posts/?page=${page}`, {
         method: "GET",
     })
     .then(res => res.json())

@@ -61,6 +61,17 @@ export const Menu = () => {
                     </>
                 )
             }
+            {isAuthenticated() && isAuthenticated().user.role === "admin" && (
+                <li className="nav-item">
+                    <Link
+                        to={`/admin`}
+                        style={isLinkActive('/admin')}
+                        className="nav-link"
+                    >
+                        Admin
+                    </Link>
+                </li>
+            )}
 
             {
                 isAuthenticated() && (

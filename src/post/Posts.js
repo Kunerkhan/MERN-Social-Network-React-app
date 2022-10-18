@@ -6,17 +6,20 @@ import DefaultPostImage from "../shared/icons/PostIcon.jpeg";
 import { getPosts } from "./api";
 
 export const Posts = () => {
-    const [posts, setPosts] = useState([]);
+    const [state, setState] = useState({
+        posts: [],
+        page: 1,
+    });
 
     const renderPosts = () => (
         <div className="row">
-            {posts.map(post => (
-                <div 
-                    className="card col-md-4" 
+            {state?.posts?.map(post => (
+                <div
+                    className="card col-md-4"
                     key={post._id}
                 >
                     <img
-                        className="img-thumbnail mb-3" 
+                        className="img-thumbnail mb-3"
                         style={{
                             width: "100%",
                             height: "200px",
@@ -28,7 +31,7 @@ export const Posts = () => {
                     <div className="card-body">
                         <h5 className="card-title">{post.title}</h5>
                         <p className="card-text">{post.body.substring(0, 100)}</p>
-                        <br/>
+                        <br />
                         <p className="font-italic mark">
                             Posted by:{" "}
                             <Link to={post?.postedBy?._id ? `/user/${post?.postedBy?._id}` : ""}>{post?.postedBy?.name || "Unknown"}</Link>
@@ -43,28 +46,58 @@ export const Posts = () => {
                     </div>
                 </div>
             ))}
-    </div>
-    )
+        </div>
+    );
 
-    useEffect(() => {
-        getPosts()
+    const loadPosts = page => {
+        getPosts(page)
             .then(data => {
-                if(data.error) {
+                if (data.error) {
                     console.log(data.error)
                 }
                 else {
-                    setPosts(data.posts);
+                    setState({ ...state, posts: data });
                 }
             });
-    }, [setPosts]);
+    };
 
-    return(
+    const loadMore = number => {
+        setState({ ...state, page: state.page + number });
+    };
+
+    const loadLess = number => {
+        setState({ ...state, page: state.page - number });
+    };
+
+    useEffect(() => {
+        loadPosts(state.page);
+    }, [state.page]);
+
+    return (
         <div className="container">
             <h2 className="mt-5 mb-5">
-                {!posts.length ? "Loading..." : "Recent Posts"}
+                {!state?.posts?.length ? "Loading..." : "Recent Posts"}
             </h2>
 
             {renderPosts()}
+
+            {state?.page > 1 ? (
+                <button
+                    className="btn btn-raised btn-warning mr-5 mt-5 mb-5"
+                    onClick={() => loadLess(1)}
+                >
+                    Previous ({state.page - 1})
+                </button>
+            ) : ""}
+
+            {state?.posts?.length ? (
+                <button
+                    className="btn btn-raised btn-success mt-5 mb-5"
+                    onClick={() => loadMore(1)}
+                >
+                    Next ({state.page + 1})
+                </button>
+            ) : ""}
         </div>
     )
 }
